@@ -36,21 +36,21 @@ const CustomerInfo = ({ skuInfo,
                         </div>
                         {/*  */}
                         <div className="border rounded px-2 py-1 flex items-center gap-2 bg-white w-full">
-                            <span className="bg-gray-100 px-2 py-0.5 font-bold text-sm rounded">Name</span>
-                            <span className="text-gray-500 text-sm">N/A</span>
+                            <span className="bg-gray-100 px-2 py-0.5 font-bold text-sm rounded">Phone</span>
+                            <span className="text-gray-500 text-sm">{phoneNumber || "N/A"}</span>
                         </div>
                     </div>
 
                     {/*  */}
                     <div className="flex justify-between gap-4">
                         <div className="border rounded px-2 py-1 flex items-center gap-2 bg-white w-full">
-                            <span className="bg-gray-100 px-2 py-0.5 font-bold text-sm rounded">Name</span>
-                            <span className="text-gray-500 text-sm">N/A</span>
+                            <span className="bg-gray-100 px-2 py-0.5 font-bold text-sm rounded">Membership</span>
+                            <span className="text-gray-500 text-sm">{"Not found"}</span>
                         </div>
                         {/*  */}
                         <div className="border rounded px-2 py-1 flex items-center gap-2 bg-white w-full">
-                            <span className="bg-gray-100 px-2 py-0.5 font-bold text-sm rounded">Name</span>
-                            <span className="text-gray-500 text-sm">N/A</span>
+                            <span className="bg-gray-100 px-2 py-0.5 font-bold text-sm rounded">Discount</span>
+                            <span className="text-gray-500 text-sm">{"Not found"}</span>
                         </div>
                     </div>
                 </div>

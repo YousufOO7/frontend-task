@@ -50,13 +50,13 @@ const PriceBill = ({ skuInfo,
     }, []);
 
     const totalMRP = skuInfo.reduce((sum, item) => sum + (item.sellPrice || 0), 0);
-    //   const totalDiscount = skuInfo.reduce((sum, item) => sum + (item.discount || 0), 0);
-    const totalWithOutVat = skuInfo.reduce((sum, item) => sum + (item.discountPrice || 0), 0);
-    const adjustedTotal = totalWithOutVat - discountAmount;
-    const validAdjustedTotal = adjustedTotal > 0 ? adjustedTotal : 0;
-    const vatAmount = (vatPercentage / 100) * validAdjustedTotal;
-    const totalPayable = validAdjustedTotal + vatAmount;
-    const uniqueItems = new Set(skuInfo.map(item => `${item.name}-${item.size}`));
+    const totalDiscount = discountAmount; // Using the global discount amount
+    const totalWithOutVat = totalMRP - totalDiscount;
+    const vatAmount = (vatPercentage / 100) * totalWithOutVat;
+    const totalPayable = totalWithOutVat + vatAmount;
+    
+    // For display purposes
+    const uniqueItems = new Set(skuInfo.map(item => `${item?.productName}-${item?.size}`));
     const totalQuantity = skuInfo.length;
     const totalNumber = uniqueItems.size;
     const totalReceived = paymentRows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
@@ -175,7 +175,7 @@ const PriceBill = ({ skuInfo,
                 sku: skuInfo.flatMap(item => Array(item.quantity || 1).fill(item.sku))
             };
 
-            console.log("📦 Submitting POS data:", JSON.stringify(posData, null, 2));
+            console.log("Submitting POS data:", JSON.stringify(posData, null, 2));
 
             const res = await axios.post(
                 `https://front-end-task-lake.vercel.app/api/v1/sell/create-sell`,
@@ -187,7 +187,7 @@ const PriceBill = ({ skuInfo,
                 }
             );
 
-            console.log("✅ POS created successfully:", res.data);
+            console.log("POS created successfully:", res.data);
             alert("POS transaction completed successfully!");
 
             // Clear form
@@ -206,9 +206,9 @@ const PriceBill = ({ skuInfo,
             setInvoice(invoice.slice(0, -4) + newNum);
 
         } catch (error) {
-            console.error("❌ Error creating POS:", error);
+            console.error("Error creating POS:", error);
             if (error.response) {
-                console.error("📨 Server response:", error.response.data);
+                console.error("Server response:", error.response.data);
                 alert(`Error: ${error.response.data.message || "Failed to create POS"}`);
             } else {
                 alert("Network error. Please try again.");
@@ -224,15 +224,15 @@ const PriceBill = ({ skuInfo,
             <div>
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>Maximum Rating Price (MRP)</p>
-                    <p><b>{totalMRP.toFixed(2)}</b></p>
+                    <p><b>{totalMRP.toFixed(2)}৳</b></p>
                 </div>
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>(+) VAT/TAX</p>
-                    <p><b>{vatAmount.toFixed(2)}</b></p>
+                    <p><b>{vatAmount.toFixed(2)}৳</b></p>
                 </div>
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>(-) Discount</p>
-                    <p><b>{discountAmount.toFixed(2)}</b></p>
+                    <p><b>{totalDiscount.toFixed(2)}৳</b></p>
                 </div>
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>Number Of Items</p>
@@ -244,7 +244,7 @@ const PriceBill = ({ skuInfo,
                 </div>
                 <div className="flex items-center justify-between">
                     <p>Total Payable Amount</p>
-                    <p><b>{totalPayable.toFixed(2)}</b></p>
+                    <p><b>{totalPayable.toFixed(2)}৳</b></p>
                 </div>
             </div>
 
@@ -310,23 +310,23 @@ const PriceBill = ({ skuInfo,
 
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>Payable Amount</p>
-                    <p><b>{totalPayable.toFixed(2)}</b></p>
+                    <p><b>{totalPayable.toFixed(2)}৳</b></p>
                 </div>
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>Total Receive Amount</p>
-                    <p><b>{totalReceived.toFixed(2)}</b></p>
+                    <p><b>{totalReceived.toFixed(2)}৳</b></p>
                 </div>
                 <div className="flex items-center justify-between border-0 border-b">
                     <p>Change</p>
-                    <p><b>{change >= 0 ? change.toFixed(2) : '0.00'}</b></p>
+                    <p><b>{change >= 0 ? change.toFixed(2) : '0.00'}৳</b></p>
                 </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex justify-evenly mt-3">
-                <button className="btn rounded-md bg-primary text-white">Cancel & Clear</button>
+                <button className="btn rounded-md bg-red-600 text-white">Cancel & Clear</button>
                 <button
-                    className="btn rounded-md"
+                    className="btn bg-green-900 text-white rounded-md"
                     onClick={handleAddPOS}
                 >Add POS</button>
             </div>
@@ -334,19 +334,19 @@ const PriceBill = ({ skuInfo,
             <div className="my-3 space-y-3">
                 <div className="flex justify-between">
                     <button
-                        className="btn rounded-md bg-primary text-white"
+                        className="btn rounded-md bg-black text-white"
                         onClick={handleHoldOrder}
                     >Hold</button>
                     <button
-                        className="btn rounded-md"
+                        className="btn bg-red-600 text-white rounded-md"
                         onClick={() => setShowHoldModal(true)}
                     >Hold List</button>
-                    <button className="btn rounded-md">SMS</button>
+                    <button className="btn bg-black text-white rounded-md">SMS</button>
                 </div>
                 <div className="flex justify-between">
                     <button className="btn rounded-md bg-primary text-white">Quotation</button>
-                    <button className="btn rounded-md">Reattempt</button>
-                    <button className="btn rounded-md">Reprint</button>
+                    <button className="btn bg-green-500 text-white rounded-md">Reattempt</button>
+                    <button className="btn bg-black text-white rounded-md">Reprint</button>
                 </div>
             </div>
 
