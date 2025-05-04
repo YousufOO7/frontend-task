@@ -1,7 +1,8 @@
 import PriceBill from "../PriceBill/PriceBill";
 
 
-const CustomerInfo = () => {
+const CustomerInfo = ({skuInfo, vatPercentage, discountAmount}) => {
+
     return (
         <div>
             <div className="border rounded-md border-accent">
@@ -37,7 +38,7 @@ const CustomerInfo = () => {
                 </div>
 
             </div>
-            <PriceBill />
+            <PriceBill skuInfo={skuInfo} vatPercentage={vatPercentage} discountAmount={discountAmount} />
         </div>
     );
 };

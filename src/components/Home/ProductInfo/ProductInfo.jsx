@@ -17,12 +17,12 @@ const ProductInfo = ({ skuInfo }) => {
         if (!acc[key]) {
             acc[key] = {
                 ...item,
-                singleWholePrice: parseFloat(item.wholePrice),
+                singleWholePrice: parseFloat(item.sellPrice),
                 MultiWholePrice: parseFloat(item.wholePrice),
                 skus: [item.sku.slice(7, 11)],
             };
         } else {
-            acc[key].singleWholePrice = parseFloat(item.wholePrice);
+            acc[key].singleWholePrice = parseFloat(item.sellPrice);
             acc[key].MultiWholePrice += parseFloat(item.wholePrice);
             acc[key].skus.push(item.sku.slice(7, 11));
         }
