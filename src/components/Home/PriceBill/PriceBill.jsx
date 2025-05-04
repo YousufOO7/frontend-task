@@ -78,7 +78,7 @@ const PriceBill = ({ skuInfo,
         setPaymentRows(updated);
     };
 
-    // Handle hold order
+    // Handle hold button order data
     const handleHoldOrder = () => {
         if (skuInfo.length === 0) {
             alert("No products to hold");
@@ -91,7 +91,7 @@ const PriceBill = ({ skuInfo,
             invoice,
             barcode,
             phoneNumber,
-            employee: selectedEmployee, 
+            employee: selectedEmployee,
             discountType,
             discountAmount,
             vatPercentage,
@@ -119,6 +119,103 @@ const PriceBill = ({ skuInfo,
         const newNum = (currentNum + 1).toString().padStart(4, '0');
         setInvoice(invoice.slice(0, -4) + newNum);
     };
+
+
+    // handle Add POS
+    const handleAddPOS = async () => {
+        if (skuInfo.length === 0) {
+            alert("Please add at least one product");
+            return;
+        }
+
+        if (totalReceived < totalPayable) {
+            alert("Payment amount is less than total amount");
+            return;
+        }
+
+        if (!selectedEmployee?.id) {
+            alert("Please select a valid employee");
+            return;
+        }
+
+        try {
+            const products = skuInfo.map(item => ({
+                variationProductId: item.variationProductId || item.id,
+                quantity: item.quantity || 1,
+                unitPrice: item.sellPrice || 0,
+                discount: item.discount || 0,
+                subTotal: ((item.sellPrice || 0) - (item.discount || 0)) * (item.quantity || 1)
+            }));
+
+            const payments = paymentRows
+                .filter(row => row.method && row.amount)
+                .map(row => {
+                    const account = paymentMethods.find(m => m.accountName === row.method);
+                    if (!account?.id) {
+                        throw new Error(`Invalid account for payment method: ${row.method}`);
+                    }
+                    return {
+                        paymentAmount: parseFloat(row.amount),
+                        accountId: account.id
+                    };
+                });
+
+            const posData = {
+                invoiceNo: invoice,
+                salesmenId: selectedEmployee?.id || 0,
+                discountType: "Fixed",
+                discount: discountAmount,
+                phone: phoneNumber,
+                totalPrice: totalWithOutVat,
+                totalPaymentAmount: totalReceived,
+                changeAmount: change >= 0 ? change : 0,
+                vat: vatAmount,
+                products: products,
+                payments: payments,
+                sku: skuInfo.flatMap(item => Array(item.quantity || 1).fill(item.sku))
+            };
+
+            console.log("📦 Submitting POS data:", JSON.stringify(posData, null, 2));
+
+            const res = await axios.post(
+                `https://front-end-task-lake.vercel.app/api/v1/sell/create-sell`,
+                posData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${import.meta.env.VITE_TOKEN}`,
+                    }
+                }
+            );
+
+            console.log("✅ POS created successfully:", res.data);
+            alert("POS transaction completed successfully!");
+
+            // Clear form
+            setSkuInfo([]);
+            setBarcode('');
+            setPhoneNumber('');
+            setDiscountAmount(0);
+            setVatPercentage(0);
+            setDiscountType('Fixed');
+            setSelectedEmployee(null);
+            setPaymentRows([{ method: "", amount: "" }]);
+
+            // Increment invoice number
+            const currentNum = parseInt(invoice.slice(-4));
+            const newNum = (currentNum + 1).toString().padStart(4, '0');
+            setInvoice(invoice.slice(0, -4) + newNum);
+
+        } catch (error) {
+            console.error("❌ Error creating POS:", error);
+            if (error.response) {
+                console.error("📨 Server response:", error.response.data);
+                alert(`Error: ${error.response.data.message || "Failed to create POS"}`);
+            } else {
+                alert("Network error. Please try again.");
+            }
+        }
+    };
+
 
 
     return (
@@ -228,7 +325,10 @@ const PriceBill = ({ skuInfo,
             {/* Action Buttons */}
             <div className="flex justify-evenly mt-3">
                 <button className="btn rounded-md bg-primary text-white">Cancel & Clear</button>
-                <button className="btn rounded-md">Add POS</button>
+                <button
+                    className="btn rounded-md"
+                    onClick={handleAddPOS}
+                >Add POS</button>
             </div>
 
             <div className="my-3 space-y-3">
