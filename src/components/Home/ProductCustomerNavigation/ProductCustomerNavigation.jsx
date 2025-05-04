@@ -88,6 +88,19 @@ const ProductCustomerNavigation = () => {
         }
     };
 
+    const handleDiscountChange = (e) => {
+        const value = e.target.value;
+        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+            setDiscountAmount(value === '' ? 0 : Number(value));
+        }
+    };
+
+    const handleVatChange = (e) => {
+        const value = e.target.value;
+        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+            setVatPercentage(value === '' ? 0 : Number(value));
+        }
+    };
 
     // sales man
 
@@ -159,14 +172,14 @@ const ProductCustomerNavigation = () => {
                                             <InputLabel id="employee-select-label">Select Sales Person</InputLabel>
                                             <Select
                                                 labelId="employee-select-label"
-                                                value={selectedEmployee}
+                                                value={selectedEmployee || ''} // Handle null case
                                                 onChange={(e) => setSelectedEmployee(e.target.value)}
                                                 label="Select Sales Person"
+                                                renderValue={(selected) => selected ? `${selected.firstName}` : ''}
                                             >
                                                 {employees?.map((emp) => (
-                                                    <MenuItem key={emp._id} value={emp?.name}>
-                                                        <p>{emp?.firstName}</p>
-                                                        {/* <p>{emp?.phone}</p> */}
+                                                    <MenuItem key={emp._id} value={emp}>
+                                                        {emp.firstName}
                                                     </MenuItem>
                                                 ))}
                                             </Select>
@@ -190,10 +203,11 @@ const ProductCustomerNavigation = () => {
                                             type="text"
                                             fullWidth
                                             required
-                                            value={discountAmount}
-                                            onChange={(e) => setDiscountAmount(Number(e.target.value))}
+                                            value={discountAmount === 0 ? '' : discountAmount}
+                                            onChange={handleDiscountChange}
                                             variant="outlined"
                                             margin="dense"
+                                            placeholder="Enter The Discount Amount"
                                             className=" text-white border-none"
                                         />
                                         <TextField
@@ -201,10 +215,11 @@ const ProductCustomerNavigation = () => {
                                             type="text"
                                             fullWidth
                                             required
-                                            value={vatPercentage}
-                                            onChange={(e) => setVatPercentage(Number(e.target.value))}
+                                            value={vatPercentage === 0 ? '' : vatPercentage}
+                                            onChange={handleVatChange}
                                             variant="outlined"
                                             margin="dense"
+                                            placeholder="Enter The VAT Amount"
                                             className=" text-white border-none"
                                         />
                                     </div>
@@ -213,12 +228,33 @@ const ProductCustomerNavigation = () => {
                         </div>
                     </div>
 
-                    <ProductInfo skuInfo={skuInfo} />
+                    <ProductInfo
+                        skuInfo={skuInfo}
+                        setSkuInfo={setSkuInfo}
+                        barcode={barcode} />
                 </div>
 
                 <div>
-                    <CustomerInfo skuInfo={skuInfo} vatPercentage={vatPercentage}
-                        discountAmount={discountAmount} />
+                    <CustomerInfo
+                        skuInfo={skuInfo}
+                        vatPercentage={vatPercentage}
+                        discountAmount={discountAmount}
+                        invoice={invoice}
+                        barcode={barcode}
+                        phoneNumber={phoneNumber}
+                        selectedEmployee={selectedEmployee}
+                        setSelectedEmployee={setSelectedEmployee}
+                        discountType={discountType}
+                        setSkuInfo={setSkuInfo}
+                        setBarcode={setBarcode}
+                        setPhoneNumber={setPhoneNumber}
+                        setInvoice={setInvoice}
+                        setDiscountAmount={setDiscountAmount}
+                        setVatPercentage={setVatPercentage}
+                        setEmployees={setEmployees}
+                        employees={employees}
+                        setDiscountType={setDiscountType}
+                    />
                 </div>
             </div>
 

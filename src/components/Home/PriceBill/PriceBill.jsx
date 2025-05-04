@@ -2,10 +2,31 @@ import { useEffect, useState } from "react";
 import { MenuItem, Select } from "@mui/material";
 import { MdDelete } from "react-icons/md";
 import axios from "axios";
+import HoldListModal from "./HoldListModal";
 
-const PriceBill = ({ skuInfo, vatPercentage, discountAmount }) => {
+const PriceBill = ({ skuInfo,
+    vatPercentage,
+    discountAmount,
+    invoice,
+    barcode,
+    phoneNumber,
+    selectedEmployee,
+    setSelectedEmployee,
+    discountType,
+    setSkuInfo,
+    setBarcode,
+    setPhoneNumber,
+    setInvoice,
+    setDiscountAmount,
+    setVatPercentage,
+    setEmployees,
+    employees,
+    setDiscountType }) => {
+
     const [paymentRows, setPaymentRows] = useState([{ method: "", amount: "" }]);
     const [paymentMethods, setPaymentMethods] = useState([]);
+    const [showHoldModal, setShowHoldModal] = useState(false);
+
 
     //   fetch account api
     useEffect(() => {
@@ -33,14 +54,11 @@ const PriceBill = ({ skuInfo, vatPercentage, discountAmount }) => {
     const totalWithOutVat = skuInfo.reduce((sum, item) => sum + (item.discountPrice || 0), 0);
     const adjustedTotal = totalWithOutVat - discountAmount;
     const validAdjustedTotal = adjustedTotal > 0 ? adjustedTotal : 0;
-
     const vatAmount = (vatPercentage / 100) * validAdjustedTotal;
     const totalPayable = validAdjustedTotal + vatAmount;
-
     const uniqueItems = new Set(skuInfo.map(item => `${item.name}-${item.size}`));
     const totalQuantity = skuInfo.length;
     const totalNumber = uniqueItems.size;
-
     const totalReceived = paymentRows.reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
     const change = totalReceived - totalPayable;
 
@@ -60,8 +78,51 @@ const PriceBill = ({ skuInfo, vatPercentage, discountAmount }) => {
         setPaymentRows(updated);
     };
 
+    // Handle hold order
+    const handleHoldOrder = () => {
+        if (skuInfo.length === 0) {
+            alert("No products to hold");
+            return;
+        }
+
+        const heldOrders = JSON.parse(localStorage.getItem('heldOrders') || '[]');
+        const newOrder = {
+            id: Date.now(),
+            invoice,
+            barcode,
+            phoneNumber,
+            employee: selectedEmployee, 
+            discountType,
+            discountAmount,
+            vatPercentage,
+            skuInfo,
+            totalPayable,
+            date: new Date().toISOString()
+        };
+
+        localStorage.setItem('heldOrders', JSON.stringify([...heldOrders, newOrder]));
+
+        // Clear the form
+        setSkuInfo([]);
+        setBarcode('');
+        setPhoneNumber('');
+        setDiscountAmount(0);
+        setVatPercentage(0);
+        setEmployees([]);
+        setDiscountType('');
+        setSelectedEmployee('')
+        setPaymentRows([{ method: "", amount: "" }]);
+
+
+        // Increment invoice number
+        const currentNum = parseInt(invoice.slice(-4));
+        const newNum = (currentNum + 1).toString().padStart(4, '0');
+        setInvoice(invoice.slice(0, -4) + newNum);
+    };
+
+
     return (
-        <div>
+        <div className="mt-5">
             {/* Summary Section */}
             <div>
                 <div className="flex items-center justify-between border-0 border-b">
@@ -172,8 +233,14 @@ const PriceBill = ({ skuInfo, vatPercentage, discountAmount }) => {
 
             <div className="my-3 space-y-3">
                 <div className="flex justify-between">
-                    <button className="btn rounded-md bg-primary text-white">Hold</button>
-                    <button className="btn rounded-md">Hold List</button>
+                    <button
+                        className="btn rounded-md bg-primary text-white"
+                        onClick={handleHoldOrder}
+                    >Hold</button>
+                    <button
+                        className="btn rounded-md"
+                        onClick={() => setShowHoldModal(true)}
+                    >Hold List</button>
                     <button className="btn rounded-md">SMS</button>
                 </div>
                 <div className="flex justify-between">
@@ -182,6 +249,21 @@ const PriceBill = ({ skuInfo, vatPercentage, discountAmount }) => {
                     <button className="btn rounded-md">Reprint</button>
                 </div>
             </div>
+
+            <HoldListModal
+                show={showHoldModal}
+                onClose={() => setShowHoldModal(false)}
+                setSkuInfo={setSkuInfo}
+                setBarcode={setBarcode}
+                setPhoneNumber={setPhoneNumber}
+                setInvoice={setInvoice}
+                setDiscountAmount={setDiscountAmount}
+                setVatPercentage={setVatPercentage}
+                employees={employees}
+                setSelectedEmployee={setSelectedEmployee}
+                setDiscountType={setDiscountType}
+            />
+
         </div>
     );
 };

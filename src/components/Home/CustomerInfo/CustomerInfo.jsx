@@ -1,7 +1,25 @@
 import PriceBill from "../PriceBill/PriceBill";
 
 
-const CustomerInfo = ({skuInfo, vatPercentage, discountAmount}) => {
+const CustomerInfo = ({ skuInfo,
+    vatPercentage,
+    discountAmount,
+    invoice,
+    barcode,
+    phoneNumber,
+    employees,
+    selectedEmployee,
+    setSelectedEmployee,
+    discountType,
+    setSkuInfo,
+    setBarcode,
+    setPhoneNumber,
+    setInvoice,
+    setVatPercentage,
+    setDiscountAmount,
+    setEmployees,
+    setDiscountType
+}) => {
 
     return (
         <div>
@@ -38,7 +56,26 @@ const CustomerInfo = ({skuInfo, vatPercentage, discountAmount}) => {
                 </div>
 
             </div>
-            <PriceBill skuInfo={skuInfo} vatPercentage={vatPercentage} discountAmount={discountAmount} />
+            <PriceBill
+                skuInfo={skuInfo}
+                vatPercentage={vatPercentage}
+                discountAmount={discountAmount}
+                invoice={invoice}
+                barcode={barcode}
+                phoneNumber={phoneNumber}
+                employees={employees}
+                selectedEmployee={selectedEmployee}
+                setSelectedEmployee={setSelectedEmployee}
+                discountType={discountType}
+                setSkuInfo={setSkuInfo}
+                setBarcode={setBarcode}
+                setPhoneNumber={setPhoneNumber}
+                setInvoice={setInvoice}
+                setDiscountAmount={setDiscountAmount}
+                setVatPercentage={setVatPercentage}
+                setEmployees={setEmployees}
+                setDiscountType={setDiscountType}
+            />
         </div>
     );
 };
